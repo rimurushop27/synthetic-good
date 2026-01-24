@@ -1,3 +1,4 @@
+
 // Ensure config is loaded
 if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
     alert("Configuration missing. Please check config.js");
@@ -25,10 +26,9 @@ const inputs = {
     image: document.getElementById('image-file'),
     preview: document.getElementById('image-preview'),
     category: document.getElementById('category'),
+    primaryTag: document.getElementById('primary-tag'),
     title: document.getElementById('title'),
-    prompt: document.getElementById('prompt'),
-    creator: document.getElementById('creator'),
-    creatorUrl: document.getElementById('creator-url')
+    prompt: document.getElementById('prompt')
 };
 
 // --- Initialization ---
@@ -41,10 +41,6 @@ async function init() {
         option.textContent = cat;
         inputs.category.appendChild(option);
     });
-
-    // Set Defaults
-    inputs.creator.value = window.APP_CONFIG.defaultCreator;
-    inputs.creatorUrl.value = window.APP_CONFIG.defaultCreatorUrl;
 
     // Check Session
     const { data: { session } } = await supabase.auth.getSession();
@@ -134,8 +130,8 @@ async function handleUpload(e) {
     try {
         // 1. Generate Slug
         let slug = generateSlug();
-        // Note: Ideally check for uniqueness via RPC, but for this scale, 
-        // a simple retry on DB error is sufficient or just low collision probability.
+        const primaryTag = inputs.primaryTag.value;
+        const tagSlug = primaryTag.replace(/\s+/g, '-');
 
         // 2. Upload Image
         setLoading(true, "Uploading Image...");
@@ -161,13 +157,17 @@ async function handleUpload(e) {
         // 4. Insert Record
         setLoading(true, "Publishing Post...");
         
+        const tags = ["ai prompt", "image prompt", primaryTag];
+
         const postData = {
             title: inputs.title.value || "Untitled",
             image_url: publicUrl,
             prompt: inputs.prompt.value,
             category: inputs.category.value,
-            creator: inputs.creator.value,
-            creator_url: inputs.creatorUrl.value,
+            primary_tag: primaryTag,
+            tags: tags,
+            creator: window.APP_CONFIG.defaultCreator,
+            creator_url: window.APP_CONFIG.defaultCreatorUrl,
             slug: slug,
             // created_at is default now()
             // like_count, use_count default 0
@@ -181,7 +181,7 @@ async function handleUpload(e) {
 
         // 5. Success
         setLoading(false);
-        showSuccess(slug);
+        showSuccess(tagSlug, slug);
 
     } catch (error) {
         console.error(error);
@@ -211,22 +211,16 @@ function showView(viewName) {
     if (viewName === 'upload') views.upload.classList.remove('hidden');
 }
 
-function showSuccess(slug) {
+function showSuccess(tagSlug, slug) {
     document.getElementById('success-view').classList.remove('hidden');
     forms.upload.classList.add('opacity-50', 'pointer-events-none');
     
-    // Change link to use query param
+    // Change link to use new URL format
     const link = document.getElementById('new-post-link');
-    link.href = `/?slug=${slug}`;
+    link.href = `/${tagSlug}/${slug}`;
     
     document.getElementById('reset-btn').onclick = () => {
-        // Reset form but keep creator info
-        const creator = inputs.creator.value;
-        const creatorUrl = inputs.creatorUrl.value;
         forms.upload.reset();
-        inputs.creator.value = creator;
-        inputs.creatorUrl.value = creatorUrl;
-        
         inputs.preview.classList.add('hidden');
         inputs.preview.src = "";
         

@@ -58,12 +58,16 @@ const Card: React.FC<CardProps> = ({ post, onCopyPrompt, onShare, onImageClick }
       e.stopPropagation();
   };
 
+  // Determine URL path based on primary_tag or fallback to legacy /p/
+  const tagSlug = post.primary_tag ? post.primary_tag.replace(/\s+/g, '-') : 'p';
+  const postUrl = `/${tagSlug}/${post.slug}`;
+
   return (
     <div className="neon-card group h-full flex flex-col will-change-transform">
       {/* Top Image Section - Strict 4:5 Ratio */}
       <div className="relative w-full aspect-[4/5] bg-black overflow-hidden z-10">
         <a 
-            href={`/p/${post.slug}`} 
+            href={postUrl} 
             className="block w-full h-full cursor-zoom-in"
             onClick={(e) => {
                 if(onImageClick) {
@@ -96,7 +100,7 @@ const Card: React.FC<CardProps> = ({ post, onCopyPrompt, onShare, onImageClick }
                 className="bg-black/60 backdrop-blur-sm flex items-center gap-1 px-1.5 py-0.5 rounded-full border border-white/10 hover:border-[var(--neon-purple)] transition-colors pointer-events-auto cursor-pointer"
             >
                 <User size={9} className="text-[var(--neon-purple)]" />
-                <span className="text-[9px] text-white truncate max-w-[70px]">{post.creator || 'Admin'}</span>
+                <span className="text-sm text-white truncate max-w-[70px]">{post.creator || 'Admin'}</span>
             </a>
         </div>
       </div>
@@ -118,23 +122,34 @@ const Card: React.FC<CardProps> = ({ post, onCopyPrompt, onShare, onImageClick }
             </button>
         </div>
 
-        {/* Actions Row */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/10">
-            <div className="flex gap-3">
-                <button 
-                    onClick={handleLike} 
-                    className={`flex items-center gap-1 text-[10px] font-bold transition-colors ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
-                >
-                    <Heart size={14} fill={isLiked ? "currentColor" : "none"} />
-                    {likes}
-                </button>
-                <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
-                    <Sparkles size={14} className="text-[var(--neon-blue)]" />
-                    {uses}
-                </div>
+        {/* Actions Row (Like, Use, Tags, Share) */}
+        <div className="flex items-center mt-auto pt-2 border-t border-white/10 gap-3 text-[10px]">
+            {/* Like */}
+            <button 
+                onClick={handleLike} 
+                className={`flex items-center gap-1 font-bold transition-colors ${isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+            >
+                <Heart size={14} fill={isLiked ? "currentColor" : "none"} />
+                {likes}
+            </button>
+            
+            {/* Use */}
+            <div className="flex items-center gap-1 font-bold text-gray-400">
+                <Sparkles size={14} className="text-[var(--neon-blue)]" />
+                {uses}
             </div>
 
-            <button onClick={handleShare} className="text-gray-400 hover:text-white transition-colors">
+            {/* Tags (Middle) */}
+            <div className="flex-1 flex items-center gap-1 overflow-hidden min-w-0">
+                {post.tags && post.tags.slice(0, 3).map((tag, idx) => (
+                    <span key={idx} className="bg-white/5 text-gray-400 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap truncate max-w-[60px]">
+                        #{tag}
+                    </span>
+                ))}
+            </div>
+
+            {/* Share */}
+            <button onClick={handleShare} className="text-gray-400 hover:text-white transition-colors shrink-0">
                 <Share2 size={16} />
             </button>
         </div>

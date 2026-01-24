@@ -2,21 +2,48 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
-# Rule 1: Handle /p/* specifically for post details
+# Rule 0: Sitemap XML to Function (FORCE = TRUE agar mengabaikan file statis)
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+  force = true
+
+# Rule 1: Handle /p/* specifically for legacy post details
 [[redirects]]
   from = "/p/*"
   to = "/index.html"
   status = 200
 
-# Rule 2: Handle Admin panel
+# Rule 2: Handle Gemini Prompt Route
+[[redirects]]
+  from = "/gemini-prompt/*"
+  to = "/index.html"
+  status = 200
+
+# Rule 3: Handle ChatGPT Prompt Route
+[[redirects]]
+  from = "/chatgpt-prompt/*"
+  to = "/index.html"
+  status = 200
+
+# Rule 4: Handle Admin panel
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
 
-# Rule 3: Catch-all for React Router / SPA
+# Rule 5: Catch-all for React Router / SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Headers untuk Sitemap XML yang valid
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=300"

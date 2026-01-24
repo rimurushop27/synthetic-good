@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,13 +66,24 @@
                         </div>
                     </div>
 
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">2. Category</label>
-                        <select id="category" class="settings-input cursor-pointer appearance-none" required>
-                            <option value="" disabled selected>Select Category</option>
-                            <!-- Populated by JS -->
-                        </select>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Primary Tag -->
+                        <div>
+                            <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">2. Primary Tag</label>
+                            <select id="primary-tag" class="settings-input cursor-pointer appearance-none" required>
+                                <option value="gemini prompt">Gemini Prompt</option>
+                                <option value="chatgpt prompt">ChatGPT Prompt</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Category -->
+                        <div>
+                            <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">3. Category</label>
+                            <select id="category" class="settings-input cursor-pointer appearance-none" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Title (Optional) -->
@@ -82,20 +94,8 @@
 
                     <!-- Prompt -->
                     <div>
-                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">3. Prompt (Wajib)</label>
+                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">4. Prompt (Wajib)</label>
                         <textarea id="prompt" rows="5" class="settings-input text-sm font-mono leading-relaxed" required placeholder="Describe the image prompt here..."></textarea>
-                    </div>
-
-                    <!-- Creator Info -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Creator Name</label>
-                            <input type="text" id="creator" class="settings-input" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">Creator URL</label>
-                            <input type="url" id="creator-url" class="settings-input" required>
-                        </div>
                     </div>
 
                     <div id="upload-status" class="text-center text-sm font-bold min-h-[20px] text-[var(--neon-blue)]"></div>

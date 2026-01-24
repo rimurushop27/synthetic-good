@@ -15,6 +15,8 @@ export interface Post {
   use_count: number;
   status?: 'draft' | 'published';
   publish_at?: string | null;
+  primary_tag?: string;
+  tags?: string[];
 }
 
 export interface AppSettings {

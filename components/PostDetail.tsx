@@ -1,24 +1,115 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, Heart, Check, User, Sparkles, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Copy, Heart, Check, User, Sparkles, ArrowLeft, ExternalLink, AlertTriangle } from 'lucide-react';
 import { Post } from '../types';
 import { incrementLike, incrementUse } from '../services/supabaseService';
 
 interface PostDetailProps {
-  post: Post;
+  post: Post | null; // Allow null for 404 state
   onBack: () => void;
 }
 
 const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
-  const [likes, setLikes] = useState(post.like_count);
-  const [uses, setUses] = useState(post.use_count);
+  const [likes, setLikes] = useState(post?.like_count || 0);
+  const [uses, setUses] = useState(post?.use_count || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // SEO & Meta Tags Effect
   useEffect(() => {
+    if (!post) {
+      document.title = "Page Not Found • Synthetic Good";
+      return;
+    }
+
+    // Helper to update meta tag
+    const updateMeta = (selector: string, attribute: string, value: string) => {
+      let el = document.querySelector(selector);
+      if (!el) {
+        el = document.createElement('meta');
+        // Parse selector simply for this use case
+        if (selector.includes('[name=')) {
+           el.setAttribute('name', selector.split('="')[1].replace('"]', ''));
+        } else if (selector.includes('[property=')) {
+           el.setAttribute('property', selector.split('="')[1].replace('"]', ''));
+        }
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attribute, value);
+    };
+
+    // Construct Data
+    const tagTitle = post.primary_tag 
+      ? post.primary_tag.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') 
+      : 'AI Prompt';
+    const pageTitle = `${tagTitle} • ${post.category} — Synthetic Good`;
+    const description = post.prompt.length > 150 ? post.prompt.substring(0, 150) + "..." : post.prompt;
+    const tagSlug = post.primary_tag ? post.primary_tag.replace(/\s+/g, '-') : 'p';
+    const canonicalUrl = `https://syntheticgoodsite.site/${tagSlug}/${post.slug}`;
+
+    // Update Title
+    document.title = pageTitle;
+
+    // Update Canonical
+    let linkCanon = document.querySelector('link[rel="canonical"]');
+    if (!linkCanon) {
+      linkCanon = document.createElement('link');
+      linkCanon.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanon);
+    }
+    linkCanon.setAttribute('href', canonicalUrl);
+
+    // Update Meta Tags (Open Graph / Twitter)
+    updateMeta('meta[name="description"]', 'content', description);
+    
+    // OG
+    updateMeta('meta[property="og:title"]', 'content', pageTitle);
+    updateMeta('meta[property="og:description"]', 'content', description);
+    updateMeta('meta[property="og:image"]', 'content', post.image_url);
+    updateMeta('meta[property="og:url"]', 'content', canonicalUrl);
+    updateMeta('meta[property="og:type"]', 'content', 'article');
+    
+    // Twitter
+    updateMeta('meta[name="twitter:card"]', 'content', 'summary_large_image');
+    updateMeta('meta[name="twitter:title"]', 'content', pageTitle);
+    updateMeta('meta[name="twitter:description"]', 'content', description);
+    updateMeta('meta[name="twitter:image"]', 'content', post.image_url);
+
+    // Cleanup function to reset title when leaving (optional)
+    return () => {
+       document.title = "Synthetic Good - Free Prompt";
+    };
+
+  }, [post]);
+
+  useEffect(() => {
+    if (!post) return;
     const likedPosts = JSON.parse(localStorage.getItem('likedPostIds') || '[]');
     if (likedPosts.includes(post.id)) setIsLiked(true);
-  }, [post.id]);
+  }, [post?.id]);
+
+  // --- 404 UI ---
+  if (!post) {
+    return (
+      <div className="container mx-auto px-4 py-20 max-w-lg text-center animate-fade-in">
+         <div className="neon-card p-10 flex flex-col items-center gap-4">
+             <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/30 mb-2">
+                 <AlertTriangle size={40} className="text-red-400" />
+             </div>
+             <h1 className="text-3xl font-bold text-white">Post Not Found</h1>
+             <p className="text-[var(--text-muted)] mb-6">
+                 The prompt you are looking for might have been removed or the URL is incorrect.
+             </p>
+             <button 
+                onClick={onBack}
+                className="neon-button px-8 py-3 rounded-full font-bold flex items-center gap-2"
+             >
+                <ArrowLeft size={18} /> Back to Home
+             </button>
+         </div>
+      </div>
+    );
+  }
 
   const handleCopy = async () => {
     try {

@@ -25,7 +25,7 @@ import Card from './components/Card';
 import PostDetail from './components/PostDetail';
 import Pagination from './components/Pagination';
 import PromoBanner from './components/PromoBanner';
-import { Zap, Flame, X, Coffee, AlertCircle, Upload, Check, Lock, LogIn, Trash2, LayoutDashboard, PlusSquare, ArrowLeft, Clock } from 'lucide-react';
+import { Zap, Flame, X, Coffee, AlertCircle, Upload, Check, Lock, LogIn, Trash2, LayoutDashboard, PlusSquare, ArrowLeft, Clock, Tag, User } from 'lucide-react';
 import { CATEGORIES } from './constants';
 
 const SOCIABUZZ_LINK = "https://sociabuzz.com/syntheticgood";
@@ -82,8 +82,13 @@ const App: React.FC = () => {
   const [uploadPreview, setUploadPreview] = useState<string>('');
   const [uploadPrompt, setUploadPrompt] = useState('');
   const [uploadCategory, setUploadCategory] = useState('');
-  const [uploadCreator, setUploadCreator] = useState('');
-  const [uploadCreatorUrl, setUploadCreatorUrl] = useState('');
+  const [uploadPrimaryTag, setUploadPrimaryTag] = useState('gemini prompt'); // Default
+  
+  // Creator State
+  const [uploadCreatorMode, setUploadCreatorMode] = useState<'admin' | 'manual'>('admin');
+  const [uploadCreator, setUploadCreator] = useState(DEFAULT_SETTINGS.defaultCreator);
+  const [uploadCreatorUrl, setUploadCreatorUrl] = useState(DEFAULT_SETTINGS.defaultCreatorUrl);
+  
   const [uploadStatus, setUploadStatus] = useState('');
   
   // Admin Scheduling
@@ -108,15 +113,27 @@ const App: React.FC = () => {
     
     // --- Routing Handler ---
     const handleRouting = () => {
-        const pathSlug = window.location.pathname.startsWith('/p/') 
-            ? window.location.pathname.split('/p/')[1] 
-            : null;
-        const querySlug = new URLSearchParams(window.location.search).get('slug');
-        const slug = pathSlug || querySlug;
+        const path = window.location.pathname;
+        let slug = null;
 
-        if (slug && slug !== 'null' && slug !== '') {
-            if (querySlug) window.history.replaceState(null, '', `/p/${slug}`);
-            handleOpenSlug(slug, false); 
+        // Legacy /p/ route
+        if (path.startsWith('/p/')) {
+            slug = path.split('/p/')[1];
+        } 
+        // New Tag Routes
+        else if (path.startsWith('/gemini-prompt/') || path.startsWith('/chatgpt-prompt/')) {
+             const parts = path.split('/');
+             if (parts.length >= 3) {
+                 slug = parts[2];
+             }
+        }
+
+        const querySlug = new URLSearchParams(window.location.search).get('slug');
+        const finalSlug = slug || querySlug;
+
+        if (finalSlug && finalSlug !== 'null' && finalSlug !== '') {
+            // Normalize URL based on detected slug if needed, but for now just open
+            handleOpenSlug(finalSlug, false); 
         } else {
             setView('home');
         }
@@ -148,13 +165,15 @@ const App: React.FC = () => {
       setCurrentPost(p);
       setView('detail');
       if (pushState) {
-        const newUrl = `/p/${slug}`;
+        // Construct pretty URL based on tag
+        const tagSlug = p.primary_tag ? p.primary_tag.replace(/\s+/g, '-') : 'p';
+        const newUrl = `/${tagSlug}/${slug}`;
         window.history.pushState({ path: newUrl }, '', newUrl);
       }
     } else {
-      triggerToast("Post not found");
-      window.history.replaceState(null, '', '/');
-      setView('home');
+      // 404 Logic: Set view to detail but currentPost to null to trigger 404 UI in PostDetail
+      setCurrentPost(null);
+      setView('detail');
     }
   };
 
@@ -245,13 +264,18 @@ const App: React.FC = () => {
 
   const handleOpenAdmin = () => {
       if (!isLoggedIn) return;
-      setUploadCreator(settingsForm.defaultCreator);
-      setUploadCreatorUrl(settingsForm.defaultCreatorUrl);
+      // Use defaults
       setUploadStatus("");
       setAdminTab('create');
       setPostStatus('published');
       setIsScheduled(false);
       setPublishDate('');
+      
+      // Reset Creator to Admin Default
+      setUploadCreatorMode('admin');
+      setUploadCreator(settingsForm.defaultCreator);
+      setUploadCreatorUrl(settingsForm.defaultCreatorUrl);
+      
       setShowAdminPanel(true);
   };
 
@@ -270,11 +294,17 @@ const App: React.FC = () => {
 
   const handlePublish = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!uploadFile || !uploadPrompt || !uploadCategory) {
-          alert("Image, Prompt and Category are required");
+      if (!uploadFile || !uploadPrompt || !uploadCategory || !uploadPrimaryTag) {
+          alert("Image, Prompt, Category and Tag are required");
           return;
       }
       
+      // Validation for Manual Creator
+      if (uploadCreatorMode === 'manual' && (!uploadCreator || !uploadCreatorUrl)) {
+          alert("Creator Name and URL are required for Manual mode");
+          return;
+      }
+
       if (isScheduled && !publishDate) {
           alert("Please select a date for scheduled publish");
           return;
@@ -297,12 +327,17 @@ const App: React.FC = () => {
               }
           }
 
+          // Auto-generate tags based on primary tag
+          const tags = ["ai prompt", "image prompt", uploadPrimaryTag];
+
           await createPost({
               image_url: url,
               prompt: uploadPrompt,
               category: uploadCategory,
-              creator: uploadCreator,
-              creator_url: uploadCreatorUrl,
+              primary_tag: uploadPrimaryTag,
+              tags: tags,
+              creator: uploadCreator, // Use current state (Admin/Manual)
+              creator_url: uploadCreatorUrl, // Use current state
               slug: slug,
               title: "AI Generated",
               status: postStatus,
@@ -354,8 +389,8 @@ const App: React.FC = () => {
   };
 
   const handleShare = async (post: Post) => {
-      const slug = post.slug;
-      const url = `${window.location.origin}/p/${slug}`;
+      const tagSlug = post.primary_tag ? post.primary_tag.replace(/\s+/g, '-') : 'p';
+      const url = `${window.location.origin}/${tagSlug}/${post.slug}`;
 
       if (navigator.share) {
           try {
@@ -402,10 +437,10 @@ const App: React.FC = () => {
              </div>
         )}
 
-        {/* DETAIL VIEW */}
-        {view === 'detail' && currentPost && (
+        {/* DETAIL VIEW (Includes 404 Logic internally) */}
+        {view === 'detail' && (
             <PostDetail 
-                post={currentPost} 
+                post={currentPost!} 
                 onBack={handleGoHome} 
             />
         )}
@@ -655,26 +690,75 @@ const App: React.FC = () => {
                                 )}
                             </div>
                             
-                            {/* Category Dropdown */}
-                            <select className="settings-input appearance-none cursor-pointer" value={uploadCategory} onChange={e => setUploadCategory(e.target.value)} required>
-                                <option value="">Select Category</option>
-                                {CATEGORIES.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
+                            {/* Primary Tag & Category */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">1. Primary Tag</label>
+                                    <select className="settings-input appearance-none cursor-pointer" value={uploadPrimaryTag} onChange={e => setUploadPrimaryTag(e.target.value)} required>
+                                        <option value="gemini prompt">Gemini Prompt</option>
+                                        <option value="chatgpt prompt">ChatGPT Prompt</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">2. Category</label>
+                                    <select className="settings-input appearance-none cursor-pointer" value={uploadCategory} onChange={e => setUploadCategory(e.target.value)} required>
+                                        <option value="">Select Category</option>
+                                        {CATEGORIES.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {/* Creator Section */}
+                            <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs text-[var(--neon-blue)] font-bold uppercase">Creator Info</label>
+                                    <div className="flex bg-black rounded p-0.5 border border-white/10">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setUploadCreatorMode('admin');
+                                                setUploadCreator(settingsForm.defaultCreator);
+                                                setUploadCreatorUrl(settingsForm.defaultCreatorUrl);
+                                            }}
+                                            className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${uploadCreatorMode === 'admin' ? 'bg-[var(--neon-blue)] text-black' : 'text-gray-400 hover:text-white'}`}
+                                        >
+                                            Admin
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setUploadCreatorMode('manual');
+                                                setUploadCreator('');
+                                                setUploadCreatorUrl('');
+                                            }}
+                                            className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${uploadCreatorMode === 'manual' ? 'bg-[var(--neon-blue)] text-black' : 'text-gray-400 hover:text-white'}`}
+                                        >
+                                            Manual
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {uploadCreatorMode === 'manual' ? (
+                                    <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                                        <div>
+                                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Name</label>
+                                            <input className="settings-input text-xs py-1.5" placeholder="Name" value={uploadCreator} onChange={e => setUploadCreator(e.target.value)} required />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">URL (https://)</label>
+                                            <input className="settings-input text-xs py-1.5" placeholder="https://..." value={uploadCreatorUrl} onChange={e => setUploadCreatorUrl(e.target.value)} required />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                        Posting as <span className="text-white font-bold">{uploadCreator}</span>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Prompt */}
                             <textarea className="settings-input h-24 font-mono text-sm" placeholder="Prompt..." value={uploadPrompt} onChange={e => setUploadPrompt(e.target.value)} required></textarea>
-
-                            {/* Creator Info */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label className="text-[10px] text-gray-500 uppercase font-bold">Creator Name</label>
-                                    <input className="settings-input" placeholder="Creator" value={uploadCreator} onChange={e => setUploadCreator(e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] text-gray-500 uppercase font-bold">Creator URL</label>
-                                    <input className="settings-input" placeholder="Creator URL" value={uploadCreatorUrl} onChange={e => setUploadCreatorUrl(e.target.value)} />
-                                </div>
-                            </div>
 
                             <div className="text-xs text-[var(--neon-blue)] text-center font-bold h-4">{uploadStatus}</div>
                             <button type="submit" className="action-btn w-full">
@@ -699,7 +783,7 @@ const App: React.FC = () => {
                                                 {isScheduled && <span className="text-[9px] bg-blue-900 text-blue-300 px-1 rounded uppercase flex items-center gap-1"><Clock size={8}/> Scheduled</span>}
                                                 {!isDraft && !isScheduled && <span className="text-[9px] bg-green-900 text-green-300 px-1 rounded uppercase">Published</span>}
                                             </div>
-                                            <div className="text-xs text-gray-400">{post.category} • /p/{post.slug}</div>
+                                            <div className="text-xs text-gray-400">{post.category} • {post.primary_tag}</div>
                                             {post.publish_at && <div className="text-[10px] text-gray-500 mt-1">Due: {new Date(post.publish_at).toLocaleString()}</div>}
                                         </div>
                                         <button 
