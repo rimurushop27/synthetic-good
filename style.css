@@ -1,0 +1,158 @@
+:root {
+  --bg: #05050a;
+  --card: #120725;
+  --card-highlight: #1a0b35;
+  --purple: #8b5cf6;
+  --purple2: #6d28d9;
+  --neon: #22d3ee;
+  --text: #eaeaf2;
+  --muted: rgba(234,234,242,.65);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Scrollbar Hiding for Horizontal Slider */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Neon Card Base */
+.neon-card {
+  background-color: var(--card);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.neon-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 
+    0 0 15px rgba(139, 92, 246, 0.15),
+    0 10px 30px rgba(0,0,0,0.6);
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 10px rgba(34,211,238,0.4), 0 0 20px rgba(139,92,246,0.3);
+}
+
+/* Portrait Card Image Container */
+.card-image-container {
+  width: 100%;
+  aspect-ratio: 4/5; /* Portrait Ratio */
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover by default */
+  transition: transform 0.5s ease;
+}
+.card-image-container:hover img {
+  transform: scale(1.05);
+}
+
+/* Prompt Box */
+.prompt-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d1d5db;
+  min-height: 80px;
+}
+
+/* Copy Button inside Prompt Box */
+.copy-btn-inner {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--neon);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.copy-btn-inner:hover {
+  background: rgba(34, 211, 238, 0.25);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card);
+  border: 1px solid var(--purple);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeUp 0.3s ease-out;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Form Styles */
+.settings-input {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+.settings-input:focus {
+  border-color: var(--neon);
+}
+
+.action-btn {
+  background: linear-gradient(135deg, var(--purple), var(--purple2));
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.action-btn:hover {
+  filter: brightness(1.2);
+}
