@@ -1,3 +1,4 @@
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Post, CategoryType, AppSettings, DEFAULT_SETTINGS } from '../types';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../constants';
@@ -59,7 +60,8 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
     .eq('slug', slug)
     .single();
     
-  if (error) return null;
+  if (error || !data) return null;
+  
   return data as Post;
 };
 
@@ -67,10 +69,16 @@ export const getViralPosts = async (): Promise<Post[]> => {
   const sb = getSupabase();
   if (!sb) return [];
 
-  // Fetch more, then sort in JS to calculate (likes + uses)
+  const now = new Date().toISOString();
+  
+  // Public Filter: 
+  // 1. Status is 'published' OR null (legacy)
+  // 2. Publish date is passed OR null (legacy)
   const { data, error } = await sb
     .from('posts')
     .select('*')
+    .or('status.eq.published,status.is.null') 
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
     .limit(50);
 
   if (error) {
@@ -79,6 +87,7 @@ export const getViralPosts = async (): Promise<Post[]> => {
   }
   
   const posts = data as Post[];
+  
   // Sort by (like_count + use_count) descending
   return posts.sort((a, b) => (b.like_count + b.use_count) - (a.like_count + a.use_count)).slice(0, 10);
 };
@@ -89,11 +98,15 @@ export const getNewPosts = async (page: number, pageSize: number, category: Cate
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+  const now = new Date().toISOString();
 
   let query = sb
     .from('posts')
     .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
+    .or('status.eq.published,status.is.null')
+    .or(`publish_at.is.null,publish_at.lte.${now}`)
+    // Sort logic: Scheduled posts usually have dates, legacy uses created_at
+    .order('created_at', { ascending: false }) 
     .range(from, to);
 
   if (category !== 'All') {
@@ -106,15 +119,17 @@ export const getNewPosts = async (page: number, pageSize: number, category: Cate
     console.error('New posts error:', error);
     return { data: [], count: 0 };
   }
+  
   return { data: data as Post[], count: count || 0 };
 };
 
 // --- Admin Management ---
 
-export const getAdminPosts = async (limit: number = 20): Promise<Post[]> => {
+export const getAdminPosts = async (limit: number = 50): Promise<Post[]> => {
     const sb = getSupabase();
     if (!sb) return [];
     
+    // Admin sees ALL (drafts, scheduled, published)
     const { data, error } = await sb
         .from('posts')
         .select('*')
@@ -129,13 +144,9 @@ export const deletePost = async (id: string, imageUrl: string) => {
     const sb = getSupabase();
     if (!sb) throw new Error("No connection");
 
-    // 1. Delete DB Record
     const { error } = await sb.from('posts').delete().eq('id', id);
-    if (error) {
-        throw error; // Throw specific Supabase error
-    }
+    if (error) throw error;
 
-    // 2. Try Delete Storage (Best effort)
     try {
         const path = imageUrl.split('/post-images/')[1];
         if (path) {
@@ -214,7 +225,15 @@ export const createPost = async (post: Partial<Post>) => {
   const sb = getSupabase();
   if (!sb) throw new Error("No connection");
   
-  const { error } = await sb.from('posts').insert([post]);
+  // Ensure we are inserting valid data types based on schema
+  const payload = {
+      ...post,
+      // Fallback defaults if not provided
+      like_count: 0,
+      use_count: 0
+  };
+
+  const { error } = await sb.from('posts').insert([payload]);
   if (error) throw error;
 };
 

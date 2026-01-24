@@ -7,133 +7,108 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="./assets/style.css">
-    <style>
-        body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text); }
-        .input-field {
-            width: 100%;
-            background: rgba(18, 7, 37, 0.8);
-            border: 1px solid rgba(139, 92, 246, 0.35);
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            outline: none;
-            transition: all 0.3s;
-        }
-        .input-field:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(34, 211, 238, 0.2); }
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: linear-gradient(to right, var(--purple2), var(--neon));
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <!-- Loading Overlay -->
-    <div id="loading" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-neonBlue"></div>
-        <p id="loading-text" class="mt-4 text-neonBlue font-bold tracking-wider">Loading...</p>
+    <div id="loading" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center backdrop-blur-sm">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--neon-blue)]"></div>
+        <p id="loading-text" class="mt-4 text-[var(--neon-blue)] font-bold tracking-wider">Loading...</p>
     </div>
 
     <div class="w-full max-w-md">
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-white mb-2 neon-text-glow">Admin Panel</h1>
-            <p class="text-gray-400 text-sm">Synthetic GoPROMPT Manager</p>
+            <p class="text-[var(--text-muted)] text-sm">Synthetic GoPROMPT Manager</p>
         </div>
 
         <!-- Login Form -->
         <div id="login-view" class="neon-card p-8">
-            <h2 class="text-xl font-bold mb-6 text-center text-neonBlue">Admin Login</h2>
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Email</label>
-                    <input type="email" id="email" class="input-field" required placeholder="admin@example.com">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Password</label>
-                    <input type="password" id="password" class="input-field" required placeholder="••••••••">
-                </div>
-                <div id="login-error" class="text-red-500 text-sm hidden text-center"></div>
-                <button type="submit" class="btn-primary mt-4">Login</button>
-            </form>
+            <div class="relative z-10">
+                <h2 class="text-xl font-bold mb-6 text-center text-[var(--neon-blue)]">Admin Login</h2>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Email</label>
+                        <input type="email" id="email" class="settings-input" required placeholder="admin@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Password</label>
+                        <input type="password" id="password" class="settings-input" required placeholder="••••••••">
+                    </div>
+                    <div id="login-error" class="text-red-500 text-sm hidden text-center"></div>
+                    <button type="submit" class="action-btn w-full mt-4">Login</button>
+                </form>
+            </div>
         </div>
 
         <!-- Upload Form -->
         <div id="upload-view" class="neon-card p-6 hidden">
-            <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-                <span class="text-sm text-green-400 font-mono">● Authenticated</span>
-                <button id="logout-btn" class="text-xs text-gray-500 hover:text-white underline">Logout</button>
-            </div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                    <span class="text-sm text-green-400 font-mono">● Authenticated</span>
+                    <button id="logout-btn" class="text-xs text-gray-500 hover:text-white underline">Logout</button>
+                </div>
 
-            <form id="upload-form" class="space-y-5">
-                <!-- Image Upload -->
-                <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-2 uppercase">1. Upload Image</label>
-                    <div class="relative w-full h-48 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-neonPurple transition-colors bg-black/40 overflow-hidden group">
-                        <input type="file" id="image-file" accept="image/*" required class="absolute inset-0 opacity-0 cursor-pointer z-10">
-                        <img id="image-preview" class="absolute inset-0 w-full h-full object-cover hidden">
-                        <div class="text-gray-400 flex flex-col items-center group-hover:text-neonPurple transition-colors z-0">
-                            <span class="text-2xl mb-2">+</span>
-                            <span class="text-xs">Tap to upload</span>
+                <form id="upload-form" class="space-y-5">
+                    <!-- Image Upload -->
+                    <div>
+                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">1. Upload Image</label>
+                        <div class="relative w-full h-48 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[var(--neon-purple)] transition-colors bg-black/20 overflow-hidden group">
+                            <input type="file" id="image-file" accept="image/*" required class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                            <img id="image-preview" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <div class="text-gray-400 flex flex-col items-center group-hover:text-[var(--neon-purple)] transition-colors z-0">
+                                <span class="text-2xl mb-2">+</span>
+                                <span class="text-xs">Tap to upload</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Category -->
-                <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-2 uppercase">2. Category</label>
-                    <select id="category" class="input-field cursor-pointer appearance-none" required>
-                        <option value="" disabled selected>Select Category</option>
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-
-                <!-- Title (Optional) -->
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Title (Optional)</label>
-                    <input type="text" id="title" class="input-field" placeholder="e.g. Cyberpunk Couple">
-                </div>
-
-                <!-- Prompt -->
-                <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-2 uppercase">3. Prompt (Wajib)</label>
-                    <textarea id="prompt" rows="5" class="input-field text-sm font-mono leading-relaxed" required placeholder="Describe the image prompt here..."></textarea>
-                </div>
-
-                <!-- Creator Info -->
-                <div class="grid grid-cols-2 gap-4">
+                    <!-- Category -->
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Creator Name</label>
-                        <input type="text" id="creator" class="input-field" required>
+                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">2. Category</label>
+                        <select id="category" class="settings-input cursor-pointer appearance-none" required>
+                            <option value="" disabled selected>Select Category</option>
+                            <!-- Populated by JS -->
+                        </select>
                     </div>
+
+                    <!-- Title (Optional) -->
                     <div>
-                        <label class="block text-xs text-gray-400 mb-1">Creator URL</label>
-                        <input type="url" id="creator-url" class="input-field" required>
+                        <label class="block text-xs text-gray-400 mb-1">Title (Optional)</label>
+                        <input type="text" id="title" class="settings-input" placeholder="e.g. Cyberpunk Couple">
                     </div>
+
+                    <!-- Prompt -->
+                    <div>
+                        <label class="block text-xs text-[var(--neon-blue)] font-bold mb-2 uppercase">3. Prompt (Wajib)</label>
+                        <textarea id="prompt" rows="5" class="settings-input text-sm font-mono leading-relaxed" required placeholder="Describe the image prompt here..."></textarea>
+                    </div>
+
+                    <!-- Creator Info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Creator Name</label>
+                            <input type="text" id="creator" class="settings-input" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">Creator URL</label>
+                            <input type="url" id="creator-url" class="settings-input" required>
+                        </div>
+                    </div>
+
+                    <div id="upload-status" class="text-center text-sm font-bold min-h-[20px] text-[var(--neon-blue)]"></div>
+
+                    <button type="submit" class="action-btn w-full">🚀 Publish Post</button>
+                </form>
+
+                <!-- Success Message -->
+                <div id="success-view" class="hidden text-center mt-4">
+                    <div class="text-green-400 text-xl font-bold mb-2">Success!</div>
+                    <a id="new-post-link" href="#" target="_blank" class="text-[var(--neon-blue)] underline text-sm block mb-4">View Post</a>
+                    <button id="reset-btn" class="text-xs border border-gray-600 px-4 py-2 rounded hover:bg-gray-800 text-white">Upload Another</button>
                 </div>
-
-                <div id="upload-status" class="text-center text-sm font-bold min-h-[20px]"></div>
-
-                <button type="submit" class="btn-primary">🚀 Publish Post</button>
-            </form>
-
-            <!-- Success Message -->
-            <div id="success-view" class="hidden text-center mt-4">
-                <div class="text-green-400 text-xl font-bold mb-2">Success!</div>
-                <a id="new-post-link" href="#" target="_blank" class="text-neonBlue underline text-sm block mb-4">View Post</a>
-                <button id="reset-btn" class="text-xs border border-gray-600 px-4 py-2 rounded hover:bg-gray-800 text-white">Upload Another</button>
             </div>
         </div>
     </div>

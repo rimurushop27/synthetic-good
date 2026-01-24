@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Copy, Heart, Check, User, Sparkles, ArrowLeft, ExternalLink } from 'lucide-react';
 import { Post } from '../types';
@@ -42,15 +43,15 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
     <div className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in">
       <button 
         onClick={onBack}
-        className="flex items-center gap-2 text-neonBlue mb-6 hover:text-white transition-colors font-medium group"
+        className="flex items-center gap-2 text-[var(--neon-blue)] mb-6 hover:text-white transition-colors font-medium group"
       >
         <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
         Back to Home
       </button>
 
-      <div className="neon-card overflow-hidden">
+      <div className="neon-card">
         {/* Large Image */}
-        <div className="relative w-full bg-black">
+        <div className="relative w-full bg-black z-10">
           <img 
             src={post.image_url} 
             alt={post.title} 
@@ -59,19 +60,19 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
           
           {/* Header Overlay */}
           <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
-             <span className="neon-badge px-3 py-1 text-xs font-bold uppercase rounded">{post.category}</span>
+             <span className="bg-black/60 text-[var(--neon-blue)] border border-[var(--neon-blue-soft)] px-3 py-1 text-xs font-bold uppercase rounded">{post.category}</span>
           </div>
         </div>
 
-        <div className="p-6 md:p-8 bg-[var(--card)]">
+        <div className="p-6 md:p-8 relative z-10 bg-transparent">
           {/* Creator & Title */}
-          <div className="flex justify-between items-start mb-6 border-b border-gray-800 pb-4">
+          <div className="flex justify-between items-start mb-6 border-b border-white/10 pb-4">
              <div>
                 <h1 className="text-2xl font-bold text-white mb-2">{post.title || "Untitled Prompt"}</h1>
                 <div className="flex items-center gap-2">
-                   <User size={14} className="text-neonBlue" />
+                   <User size={14} className="text-[var(--neon-blue)]" />
                    {post.creator_url ? (
-                     <a href={post.creator_url} target="_blank" rel="noreferrer" className="text-sm text-gray-300 hover:text-neonBlue flex items-center gap-1">
+                     <a href={post.creator_url} target="_blank" rel="noreferrer" className="text-sm text-gray-300 hover:text-[var(--neon-blue)] flex items-center gap-1">
                        {post.creator} <ExternalLink size={12} />
                      </a>
                    ) : (
@@ -90,7 +91,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
                   <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
                   <span className="text-xs font-bold">{likes}</span>
                 </button>
-                <div className="flex flex-col items-center gap-1 text-neonBlue">
+                <div className="flex flex-col items-center gap-1 text-[var(--neon-blue)]">
                   <Sparkles size={24} />
                   <span className="text-xs font-bold">{uses}</span>
                 </div>
@@ -98,9 +99,9 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
           </div>
 
           {/* Prompt Section */}
-          <div className="relative bg-gray-900/40 border border-gray-800 rounded-lg p-6 group">
-            <h3 className="text-neonBlue text-sm font-bold uppercase tracking-wider mb-3">Prompt</h3>
-            <p className="text-gray-300 leading-relaxed font-light text-base md:text-lg mb-4 whitespace-pre-wrap select-text">
+          <div className="relative bg-black/30 border border-white/10 rounded-lg p-6 group">
+            <h3 className="text-[var(--neon-blue)] text-sm font-bold uppercase tracking-wider mb-3">Prompt</h3>
+            <p className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg mb-4 whitespace-pre-wrap select-text">
                {post.prompt}
             </p>
             

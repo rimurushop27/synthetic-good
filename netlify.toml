@@ -1,20 +1,21 @@
+
 [build]
   command = "npm run build"
   publish = "dist"
 
-# Handle Single Page Application routing for the main app
+# Rule 1: Handle /p/* specifically for post details
 [[redirects]]
   from = "/p/*"
   to = "/index.html"
   status = 200
 
-# Handle the Admin panel route
+# Rule 2: Handle Admin panel
 [[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
 
-# Catch-all fallback
+# Rule 3: Catch-all for React Router / SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"

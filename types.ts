@@ -1,3 +1,4 @@
+
 export type CategoryType = 'All' | 'Couple' | 'Boy' | 'Girl' | 'Girl Hijab';
 
 export interface Post {
@@ -12,6 +13,8 @@ export interface Post {
   created_at: string;
   like_count: number;
   use_count: number;
+  status?: 'draft' | 'published';
+  publish_at?: string | null;
 }
 
 export interface AppSettings {

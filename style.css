@@ -1,21 +1,50 @@
+
 :root {
-  --bg: #05050a;
-  --card: #120725;
-  --card-highlight: #1a0b35;
-  --purple: #8b5cf6;
-  --purple2: #6d28d9;
-  --neon: #22d3ee;
-  --text: #eaeaf2;
-  --muted: rgba(234,234,242,.65);
+  /* Global Background */
+  --bg-core: #05040a;
+  
+  /* Purple Surface Palette */
+  --surface-dark: #1a0f2e;
+  --surface-light: #22123d;
+  
+  /* Text */
+  --text-primary: #f2f2ff;
+  --text-muted: rgba(242, 242, 255, 0.65);
+  
+  /* Neon Accent */
+  --neon-blue: #36e3ff;
+  --neon-blue-soft: rgba(54, 227, 255, 0.35);
+  --neon-blue-ultra: rgba(54, 227, 255, 0.18);
+  --neon-purple: #a45cff;
 }
 
-body {
-  background-color: var(--bg);
-  color: var(--text);
+body, #root {
+  background-color: var(--bg-core);
+  background-image: 
+    radial-gradient(circle at 50% -20%, rgba(164, 92, 255, 0.18), transparent 55%),
+    radial-gradient(circle at 0% 40%, rgba(54, 227, 255, 0.10), transparent 55%);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* Scrollbar Hiding for Horizontal Slider */
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-core);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border: 1px solid var(--neon-blue-ultra);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-purple);
+}
+
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
@@ -24,83 +53,119 @@ body {
     scrollbar-width: none;
 }
 
-/* Neon Card Base */
+/* --- THE NEON CARD (OPTIMIZED) --- */
 .neon-card {
-  background-color: var(--card);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   position: relative;
+  background: linear-gradient(180deg, var(--surface-light) 0%, var(--surface-dark) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--neon-blue-ultra);
+  /* Optimized Shadow: Reduced layers & spread for performance */
+  box-shadow:
+    0 0 0 1px rgba(54, 227, 255, 0.10),
+    0 0 15px rgba(54, 227, 255, 0.15); 
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  /* PERFORMANCE HINTS */
+  contain: layout paint; /* Browser doesn't repaint outside this box */
+  transform: translate3d(0,0,0); /* Force GPU acceleration */
+  backface-visibility: hidden;
+}
+
+/* Glow Blur Layer (Reduced Blur Radius) */
+.neon-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(circle at 20% 10%, rgba(54, 227, 255, 0.25), transparent 55%),
+              radial-gradient(circle at 80% 90%, rgba(54, 227, 255, 0.15), transparent 60%);
+  filter: blur(10px); /* Reduced from 14px */
+  opacity: 1;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Border Gradient Mask */
+.neon-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(54,227,255,0.55), rgba(164,92,255,0.35), rgba(54,227,255,0.35));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 2;
 }
 
 .neon-card:hover {
-  border-color: rgba(34, 211, 238, 0.4);
-  box-shadow: 
-    0 0 15px rgba(139, 92, 246, 0.15),
-    0 10px 30px rgba(0,0,0,0.6);
+  transform: translateY(-2px);
+  /* Hover shadow slightly intensified */
+  box-shadow:
+    0 0 0 1px rgba(54, 227, 255, 0.30),
+    0 0 25px rgba(54, 227, 255, 0.25);
+}
+
+/* --- Content Utilities inside Neon Card --- */
+.neon-content {
+  position: relative;
+  z-index: 10;
 }
 
 .neon-text-glow {
-  text-shadow: 0 0 10px rgba(34,211,238,0.4), 0 0 20px rgba(139,92,246,0.3);
+  text-shadow: 0 0 10px var(--neon-blue-soft), 0 0 20px rgba(164, 92, 255, 0.4);
 }
 
 /* Portrait Card Image Container */
 .card-image-container {
   width: 100%;
-  aspect-ratio: 4/5; /* Portrait Ratio */
+  aspect-ratio: 4/5;
   background: #000;
   position: relative;
   overflow: hidden;
-}
-
-.card-image-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Cover by default */
-  transition: transform 0.5s ease;
-}
-.card-image-container:hover img {
-  transform: scale(1.05);
+  z-index: 10; 
 }
 
 /* Prompt Box */
 .prompt-box {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   padding: 12px;
   position: relative;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: #d1d5db;
+  color: var(--text-muted);
   min-height: 80px;
 }
 
-/* Copy Button inside Prompt Box */
 .copy-btn-inner {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(34, 211, 238, 0.1);
-  color: var(--neon);
-  border: 1px solid rgba(34, 211, 238, 0.2);
+  background: rgba(34, 227, 255, 0.1);
+  color: var(--neon-blue);
+  border: 1px solid rgba(34, 227, 255, 0.2);
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
   transition: all 0.2s;
   backdrop-filter: blur(4px);
+  z-index: 20;
 }
 .copy-btn-inner:hover {
-  background: rgba(34, 211, 238, 0.25);
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+  background: var(--neon-blue);
+  color: #000;
+  box-shadow: 0 0 15px var(--neon-blue);
 }
 
-/* Modal Overlay */
+/* Modal Overlay (Reduced Blur) */
 .modal-overlay {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(5px);
+  background: rgba(5, 4, 10, 0.85); 
+  backdrop-filter: blur(4px); /* Reduced from 8px for performance */
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -111,48 +176,125 @@ body {
 }
 
 .modal-content {
-  background: var(--card);
-  border: 1px solid var(--purple);
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
-  border-radius: 16px;
+  position: relative;
+  background: linear-gradient(180deg, var(--surface-light) 0%, var(--surface-dark) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--neon-blue-ultra);
+  box-shadow: 0 0 40px rgba(54, 227, 255, 0.15);
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
   animation: fadeUp 0.3s ease-out;
+  color: var(--text-primary);
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Form Styles */
+/* Page Transition Animation */
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page-enter {
+    animation: pageEnter 0.25s ease-out forwards;
+}
+
+/* Skeleton Shimmer Loading */
+.skeleton-loader {
+    background: #1a0f2e;
+    position: relative;
+    overflow: hidden;
+}
+.skeleton-loader::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.05) 20%,
+        rgba(255, 255, 255, 0.1) 60%,
+        rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+/* Inputs & Buttons */
 .settings-input {
   width: 100%;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: white;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
   padding: 10px 14px;
   border-radius: 8px;
   outline: none;
   font-size: 0.9rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 .settings-input:focus {
-  border-color: var(--neon);
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 10px var(--neon-blue-soft);
+  background: rgba(54, 227, 255, 0.05);
 }
 
 .action-btn {
-  background: linear-gradient(135deg, var(--purple), var(--purple2));
+  background: linear-gradient(135deg, var(--neon-purple), #6d28d9);
   color: white;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: filter 0.2s;
+  transition: all 0.2s;
 }
 .action-btn:hover {
   filter: brightness(1.2);
+  box-shadow: 0 0 20px rgba(164, 92, 255, 0.5);
+}
+
+.neon-button {
+  background: rgba(34, 227, 255, 0.1);
+  border: 1px solid var(--neon-blue-soft);
+  color: var(--neon-blue);
+  transition: all 0.3s;
+}
+.neon-button:hover {
+  background: var(--neon-blue);
+  color: #000;
+  box-shadow: 0 0 20px var(--neon-blue-soft);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- UX SCROLL ANCHOR & HIGHLIGHT --- */
+#latest-updates {
+  scroll-margin-top: 90px; /* Header height + padding */
+  transition: box-shadow 0.4s ease-out;
+  border-radius: 16px;
+}
+
+#latest-updates.highlight-active {
+  box-shadow: 
+    0 0 0 1px var(--neon-blue-soft), 
+    0 0 40px rgba(54, 227, 255, 0.15);
 }
