@@ -1,29 +1,36 @@
 import type { Handler } from "@netlify/functions";
 
-export const handler: Handler = async (event) => {
-  // ambil domain yang lagi dipakai (paling aman)
-  const host =
-    event.headers["x-forwarded-host"] ||
-    event.headers["host"] ||
-    "syntheticgood.site";
+const SITE = "https://syntheticgood.site";
 
-  const siteUrl = `https://${host}`;
+// Tambah/kurangin halaman statis lu di sini
+const STATIC_PATHS = ["/", "/gemini-prompt", "/chatgpt-prompt", "/admin"];
 
-  // TODO: isi URL penting yang mau masuk sitemap
-  const urls = [
-    `${siteUrl}/`,
-    // `${siteUrl}/admin`,  // kalau mau
-  ];
+function xmlEscape(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
+function buildXml(urls: string[]) {
   const now = new Date().toISOString();
+  const body = urls
+    .map((u) => {
+      const loc = u.startsWith("http") ? u : `${SITE}${u}`;
+      return `  <url>
+    <loc>${xmlEscape(loc)}</loc>
+    <lastmod>${now}</lastmod>
+  </url>`;
+    })
+    .join("\n");
 
-  const body =
-    `<?xml version="1.0" encoding="UTF-8"?>` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
-    urls
-      .map((u) => `<url><loc>${u}</loc><lastmod>${now}</lastmod></url>`)
-      .join("") +
-    `</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${body}
+</urlset>
+`;
+}
+
+export const handler: Handler = async () => {
+  // sementara: sitemap berisi halaman statis dulu biar ga cuma 1
+  const urls = Array.from(new Set(STATIC_PATHS));
 
   return {
     statusCode: 200,
@@ -31,6 +38,6 @@ export const handler: Handler = async (event) => {
       "Content-Type": "application/xml; charset=utf-8",
       "Cache-Control": "public, max-age=300",
     },
-    body,
+    body: buildXml(urls),
   };
 };
