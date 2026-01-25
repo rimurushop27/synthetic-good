@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://syntheticgoodsite.site/sitemap.xml
+
+Sitemap: https://syntheticgood.site/sitemap.xml
