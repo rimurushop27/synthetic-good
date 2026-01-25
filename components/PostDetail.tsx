@@ -45,7 +45,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
     const pageTitle = `${tagTitle} • ${post.category} — Synthetic Good`;
     const description = post.prompt.length > 150 ? post.prompt.substring(0, 150) + "..." : post.prompt;
     const tagSlug = post.primary_tag ? post.primary_tag.replace(/\s+/g, '-') : 'p';
-    const canonicalUrl = `https://syntheticgoodsite.site/${tagSlug}/${post.slug}`;
+    const canonicalUrl = `https://syntheticgood.site/${tagSlug}/${post.slug}`;
 
     // Update Title
     document.title = pageTitle;
