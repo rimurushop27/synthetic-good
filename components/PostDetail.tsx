@@ -1,15 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, Heart, Check, User, Sparkles, ArrowLeft, ExternalLink, AlertTriangle } from 'lucide-react';
-import { Post } from '../types';
+import { Copy, Heart, Check, User, Sparkles, ArrowLeft, ExternalLink, AlertTriangle, Share2 } from 'lucide-react';
+import { Post, SiteBanner as SiteBannerType } from '../types';
 import { incrementLike, incrementUse } from '../services/supabaseService';
+import SiteBanner from './SiteBanner';
 
 interface PostDetailProps {
   post: Post | null; // Allow null for 404 state
   onBack: () => void;
+  banners: { top: SiteBannerType | null, bottom: SiteBannerType | null };
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ post, onBack, banners }) => {
   const [likes, setLikes] = useState(post?.like_count || 0);
   const [uses, setUses] = useState(post?.use_count || 0);
   const [isLiked, setIsLiked] = useState(false);
@@ -130,17 +132,72 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
     await incrementLike(post.id);
   };
 
+  const handleShare = async () => {
+    if (!post) return;
+    
+    // Build URL based on category/type
+    const PUBLIC_SITE_URL = "https://syntheticgood.site";
+    const isChatGPT = (post.category || '').toLowerCase().includes('chatgpt') || 
+                      (post.primary_tag || '').toLowerCase().includes('chatgpt');
+    const route = isChatGPT ? 'chatgpt-prompt' : 'gemini-prompt';
+    const slug = post.slug || post.id;
+    const url = `${PUBLIC_SITE_URL}/${route}/${slug}`;
+
+    const title = "Get Prompt";
+    const shareText = `Get Prompt\n${url}`;
+
+    if (!navigator.share) {
+        await navigator.clipboard.writeText(url);
+        alert("URL post disalin");
+        return;
+    }
+
+    try {
+        let files: File[] = [];
+        try {
+            const response = await fetch(post.image_url);
+            const blob = await response.blob();
+            const file = new File([blob], 'image.jpg', { type: blob.type });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                files = [file];
+            }
+        } catch (e) {
+            console.warn("Failed to prepare image for sharing", e);
+        }
+
+        if (files.length > 0) {
+            await navigator.share({ 
+                title, 
+                text: shareText, 
+                files 
+            });
+        } else {
+            await navigator.share({ 
+                title, 
+                text: shareText,
+                url 
+            });
+        }
+    } catch (err) {
+        console.error("Share failed", err);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in">
-      <button 
-        onClick={onBack}
-        className="flex items-center gap-2 text-[var(--neon-blue)] mb-6 hover:text-white transition-colors font-medium group"
-      >
-        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Home
-      </button>
+      <div className="flex justify-between items-center mb-6">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-[var(--neon-blue)] hover:text-white transition-colors font-medium group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          Back to Home
+        </button>
+      </div>
 
-      <div className="neon-card">
+      <SiteBanner banner={banners.top} variant="top" />
+
+      <div className="neon-card mb-8">
         {/* Large Image */}
         <div className="relative w-full bg-black z-10">
           <img 
@@ -196,20 +253,32 @@ const PostDetail: React.FC<PostDetailProps> = ({ post, onBack }) => {
                {post.prompt}
             </p>
             
-            <button 
-              onClick={handleCopy}
-              className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
-                copied 
-                ? 'bg-green-500/20 text-green-400 border border-green-500/40' 
-                : 'neon-button'
-              }`}
-            >
-              {copied ? <Check size={18} /> : <Copy size={18} />}
-              {copied ? 'Copied to Clipboard' : 'Copy Prompt'}
-            </button>
+            <div className="flex flex-col md:flex-row gap-3">
+              <button 
+                onClick={handleCopy}
+                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
+                  copied 
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/40' 
+                  : 'neon-button'
+                }`}
+              >
+                {copied ? <Check size={18} /> : <Copy size={18} />}
+                {copied ? 'Copied to Clipboard' : 'Copy Prompt'}
+              </button>
+              
+              <button 
+                onClick={handleShare}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold transition-all bg-white/5 hover:bg-white/10 text-white border border-white/10"
+              >
+                <Share2 size={18} />
+                Share
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <SiteBanner banner={banners.bottom} variant="bottom" />
     </div>
   );
 };

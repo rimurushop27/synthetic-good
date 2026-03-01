@@ -1,6 +1,6 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Post, CategoryType, AppSettings, DEFAULT_SETTINGS } from '../types';
+import { Post, CategoryType, AppSettings, DEFAULT_SETTINGS, SiteBanner } from '../types';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../constants';
 
 const STORAGE_KEY = 'synthetic_app_settings';
@@ -239,4 +239,38 @@ export const createPost = async (post: Partial<Post>) => {
 
 export const generateSlug = () => {
     return Math.random().toString(36).substring(2, 8); // 6 chars
+};
+
+// --- Site Banners ---
+
+export const getSiteBanners = async (): Promise<{ top: SiteBanner | null, bottom: SiteBanner | null }> => {
+  const sb = getSupabase();
+  if (!sb) return { top: null, bottom: null };
+
+  const { data, error } = await sb
+    .from('site_banners')
+    .select('*')
+    .in('id', ['banner_top', 'banner_bottom']);
+
+  if (error) {
+    console.error('Error fetching site banners:', error);
+    return { top: null, bottom: null };
+  }
+
+  const banners = data as SiteBanner[];
+  const top = banners.find(b => b.id === 'banner_top') || null;
+  const bottom = banners.find(b => b.id === 'banner_bottom') || null;
+
+  return { top, bottom };
+};
+
+export const updateSiteBanner = async (banner: SiteBanner) => {
+  const sb = getSupabase();
+  if (!sb) throw new Error("No connection");
+
+  const { error } = await sb
+    .from('site_banners')
+    .upsert(banner, { onConflict: 'id' });
+
+  if (error) throw error;
 };

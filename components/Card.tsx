@@ -83,7 +83,7 @@ const Card: React.FC<CardProps> = ({ post, onCopyPrompt, onShare, onImageClick }
                 style={{ filter: 'none' }} /* Force no filter */
                 loading="lazy" 
                 decoding="async"
-                fetchPriority="low"
+                fetchpriority="low"
             />
         </a>
 

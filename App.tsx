@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Post, CategoryType, AppSettings, DEFAULT_SETTINGS } from './types';
+import { Post, CategoryType, AppSettings, DEFAULT_SETTINGS, SiteBanner as SiteBannerType } from './types';
 import { 
   getViralPosts, 
   getNewPosts, 
@@ -16,7 +16,9 @@ import {
   createPost,
   generateSlug,
   getAdminPosts,
-  deletePost
+  deletePost,
+  getSiteBanners,
+  updateSiteBanner
 } from './services/supabaseService';
 import Header from './components/Header';
 import SidePanel from './components/SidePanel';
@@ -24,11 +26,11 @@ import Footer from './components/Footer';
 import Card from './components/Card';
 import PostDetail from './components/PostDetail';
 import Pagination from './components/Pagination';
-import PromoBanner from './components/PromoBanner';
-import { Zap, Flame, X, Coffee, AlertCircle, Upload, Check, Lock, LogIn, Trash2, LayoutDashboard, PlusSquare, ArrowLeft, Clock, Tag, User } from 'lucide-react';
+import SiteBanner from './components/SiteBanner';
+import { Zap, Flame, X, Coffee, AlertCircle, Upload, Check, Lock, LogIn, Trash2, LayoutDashboard, PlusSquare, ArrowLeft, Clock, Tag, User, Save, Megaphone } from 'lucide-react';
 import { CATEGORIES } from './constants';
 
-const SOCIABUZZ_LINK = "https://sociabuzz.com/syntheticgood";
+const DONATION_LINK = "https://ko-fi.com/syntheticgood";
 
 // Skeleton Components
 const CardSkeleton = () => (
@@ -43,6 +45,83 @@ const CardSkeleton = () => (
         </div>
     </div>
 );
+
+const BannerForm = ({ title, banner, onSave }: { title: string, banner: SiteBannerType | null, onSave: (b: SiteBannerType) => void }) => {
+    const [form, setForm] = useState<SiteBannerType>(banner || {
+        id: title === 'Top Banner' ? 'banner_top' : 'banner_bottom',
+        placement: title === 'Top Banner' ? 'top' : 'bottom',
+        is_active: false,
+        badge_text: '',
+        pack_label: '',
+        title: '',
+        subtitle: '',
+        button_text: '',
+        button_url: ''
+    });
+
+    useEffect(() => {
+        if (banner) setForm(banner);
+    }, [banner]);
+
+    const handleChange = (field: keyof SiteBannerType, value: any) => {
+        setForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    return (
+        <form onSubmit={(e) => { e.preventDefault(); onSave(form); }} className="bg-white/5 p-4 rounded-lg border border-white/10 space-y-3">
+            <h3 className="text-[var(--neon-blue)] font-bold uppercase text-sm mb-2 flex items-center gap-2">
+                {title === 'Top Banner' ? <Zap size={14}/> : <Megaphone size={14}/>} {title}
+            </h3>
+            
+            <div className="flex items-center gap-2 mb-2 bg-black/20 p-2 rounded border border-white/5">
+                <input 
+                    type="checkbox" 
+                    checked={form.is_active} 
+                    onChange={e => handleChange('is_active', e.target.checked)}
+                    className="w-4 h-4 accent-[var(--neon-blue)] cursor-pointer"
+                    id={`active-${title}`}
+                />
+                <label htmlFor={`active-${title}`} className="text-xs text-white font-bold cursor-pointer select-none">Enable Banner</label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                <div>
+                    <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Badge Text</label>
+                    <input className="settings-input text-xs py-1.5" value={form.badge_text || ''} onChange={e => handleChange('badge_text', e.target.value)} placeholder="e.g. NEW" />
+                </div>
+                <div>
+                    <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Pack Label</label>
+                    <input className="settings-input text-xs py-1.5" value={form.pack_label || ''} onChange={e => handleChange('pack_label', e.target.value)} placeholder="e.g. Premium Pack" />
+                </div>
+            </div>
+
+            <div>
+                <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Title</label>
+                <input className="settings-input text-xs py-1.5" value={form.title || ''} onChange={e => handleChange('title', e.target.value)} placeholder="Banner Title" />
+            </div>
+
+            <div>
+                <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Subtitle</label>
+                <input className="settings-input text-xs py-1.5" value={form.subtitle || ''} onChange={e => handleChange('subtitle', e.target.value)} placeholder="Banner Subtitle" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+                <div>
+                    <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Button Text</label>
+                    <input className="settings-input text-xs py-1.5" value={form.button_text || ''} onChange={e => handleChange('button_text', e.target.value)} placeholder="e.g. Buy Now" />
+                </div>
+                <div>
+                    <label className="text-[10px] text-gray-500 font-bold uppercase block mb-1">Button URL</label>
+                    <input className="settings-input text-xs py-1.5" value={form.button_url || ''} onChange={e => handleChange('button_url', e.target.value)} placeholder="https://..." />
+                </div>
+            </div>
+
+            <button type="submit" className="bg-white/10 hover:bg-[var(--neon-blue)] hover:text-black text-white text-xs font-bold py-2 px-4 rounded transition-colors w-full flex items-center justify-center gap-2">
+                <Save size={14}/> Save {title}
+            </button>
+        </form>
+    );
+};
 
 const App: React.FC = () => {
   // --- Global State ---
@@ -71,9 +150,12 @@ const App: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
 
+  // Banners
+  const [banners, setBanners] = useState<{ top: SiteBannerType | null, bottom: SiteBannerType | null }>({ top: null, bottom: null });
+
   // --- Admin State ---
   const [settingsForm, setSettingsForm] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [adminTab, setAdminTab] = useState<'create' | 'manage'>('create');
+  const [adminTab, setAdminTab] = useState<'create' | 'manage' | 'banners'>('create');
   const [adminPosts, setAdminPosts] = useState<Post[]>([]);
   const [isDeleting, setIsDeleting] = useState('');
   
@@ -153,6 +235,10 @@ const App: React.FC = () => {
     const n = await getNewPosts(1, 10, 'All');
     setNewPosts(n.data);
     setTotalNewCount(n.count);
+
+    const b = await getSiteBanners();
+    setBanners(b);
+
     setLoading(false);
   };
 
@@ -292,6 +378,20 @@ const App: React.FC = () => {
       }
   }, [showAdminPanel, adminTab]);
 
+  const handleSaveBanner = async (banner: SiteBannerType) => {
+      try {
+          setUploadStatus("Saving Banner...");
+          await updateSiteBanner(banner);
+          setUploadStatus("Banner Saved!");
+          triggerToast("Banner Updated");
+          fetchData(); // Refresh global state
+          setTimeout(() => setUploadStatus(""), 2000);
+      } catch (err: any) {
+          console.error(err);
+          setUploadStatus("Error: " + err.message);
+      }
+  };
+
   const handlePublish = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!uploadFile || !uploadPrompt || !uploadCategory || !uploadPrimaryTag) {
@@ -389,22 +489,62 @@ const App: React.FC = () => {
   };
 
   const handleShare = async (post: Post) => {
-      const tagSlug = post.primary_tag ? post.primary_tag.replace(/\s+/g, '-') : 'p';
-      const url = `${window.location.origin}/${tagSlug}/${post.slug}`;
+      // Build URL based on category/type
+      const PUBLIC_SITE_URL = "https://syntheticgood.site";
+      const isChatGPT = (post.category || '').toLowerCase().includes('chatgpt') || 
+                        (post.primary_tag || '').toLowerCase().includes('chatgpt');
+      const route = isChatGPT ? 'chatgpt-prompt' : 'gemini-prompt';
+      const slug = post.slug || post.id;
+      const url = `${PUBLIC_SITE_URL}/${route}/${slug}`;
+      
+      const title = "Get Prompt";
+      const shareText = `Get Prompt\n${url}`;
 
-      if (navigator.share) {
+      if (!navigator.share) {
+          await navigator.clipboard.writeText(url);
+          triggerToast("URL post disalin");
+          return;
+      }
+
+      try {
+          let files: File[] = [];
+          
+          // Try to fetch image
           try {
-              await navigator.share({ url });
-          } catch (err) { console.error(err); }
-      } else {
-          navigator.clipboard.writeText(url);
-          triggerToast("Link copied!");
+            const response = await fetch(post.image_url);
+            const blob = await response.blob();
+            const file = new File([blob], 'image.jpg', { type: blob.type });
+            
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                files = [file];
+            }
+          } catch (e) {
+            console.warn("Failed to prepare image for sharing", e);
+          }
+
+          if (files.length > 0) {
+              // Share with image + URL as text
+              await navigator.share({ 
+                  title, 
+                  text: shareText, 
+                  files 
+              });
+          } else {
+              // Fallback to URL sharing
+              await navigator.share({ 
+                  title, 
+                  text: shareText,
+                  url 
+              });
+          }
+      } catch (err) {
+          console.error("Share failed", err);
       }
   };
 
-  // UPDATED: Direct redirect to Sociabuzz
+  // UPDATED: Direct redirect to Donation Link
   const handleDonateClick = () => {
-    window.open(SOCIABUZZ_LINK, '_blank');
+    window.open(DONATION_LINK, '_blank');
   };
 
   return (
@@ -442,6 +582,7 @@ const App: React.FC = () => {
             <PostDetail 
                 post={currentPost!} 
                 onBack={handleGoHome} 
+                banners={banners}
             />
         )}
 
@@ -455,7 +596,7 @@ const App: React.FC = () => {
                     </button>
                 </div>
 
-                <PromoBanner />
+                <SiteBanner banner={banners.top} variant="top" />
 
                 {/* 1) MOST VIRAL */}
                 <section className="mb-12">
@@ -533,6 +674,8 @@ const App: React.FC = () => {
                             onPageChange={handlePageChange}
                         />
                     </div>
+
+                    <SiteBanner banner={banners.bottom} variant="bottom" />
                 </section>
             </>
         )}
@@ -624,11 +767,17 @@ const App: React.FC = () => {
                       >
                           <LayoutDashboard size={16}/> Manage Posts
                       </button>
+                      <button 
+                        onClick={() => setAdminTab('banners')}
+                        className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors ${adminTab === 'banners' ? 'text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)] bg-white/5' : 'text-gray-400 hover:text-white'}`}
+                      >
+                          <Megaphone size={16}/> Site Banners
+                      </button>
                   </div>
                   
                   {/* Content Area */}
                   <div className="p-6 overflow-y-auto flex-grow relative z-10">
-                      {adminTab === 'create' ? (
+                      {adminTab === 'create' && (
                         <form onSubmit={handlePublish} className="space-y-4">
                             {/* Publishing Control */}
                             <div className="flex items-center gap-4 bg-black/30 p-3 rounded-lg border border-white/10">
@@ -765,7 +914,9 @@ const App: React.FC = () => {
                                 {postStatus === 'draft' ? 'Save Draft' : (isScheduled ? 'Schedule Post' : 'Publish Now')}
                             </button>
                         </form>
-                      ) : (
+                      )}
+
+                      {adminTab === 'manage' && (
                           <div className="space-y-3">
                               {adminPosts.length === 0 && <div className="text-center text-gray-500 py-8">No posts found</div>}
                               {adminPosts.map(post => {
@@ -796,6 +947,34 @@ const App: React.FC = () => {
                                     </div>
                                   );
                               })}
+                          </div>
+                      )}
+
+                      {adminTab === 'banners' && (
+                          <div className="space-y-6 animate-fade-in">
+                              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
+                                  <h4 className="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2">
+                                      <Megaphone size={14}/> Banner Management
+                                  </h4>
+                                  <p className="text-xs text-gray-400">
+                                      Manage the promotional banners displayed on the Homepage and Post Detail pages. 
+                                      Changes are applied immediately after saving.
+                                  </p>
+                              </div>
+
+                              <BannerForm 
+                                  title="Top Banner" 
+                                  banner={banners.top} 
+                                  onSave={handleSaveBanner} 
+                              />
+                              
+                              <BannerForm 
+                                  title="Bottom Banner" 
+                                  banner={banners.bottom} 
+                                  onSave={handleSaveBanner} 
+                              />
+                              
+                              <div className="text-xs text-[var(--neon-blue)] text-center h-4 font-bold">{uploadStatus}</div>
                           </div>
                       )}
                   </div>

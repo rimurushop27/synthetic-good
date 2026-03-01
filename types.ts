@@ -19,6 +19,19 @@ export interface Post {
   tags?: string[];
 }
 
+export interface SiteBanner {
+  id: string;
+  placement: 'top' | 'bottom';
+  is_active: boolean;
+  badge_text: string;
+  pack_label: string;
+  title: string;
+  subtitle: string;
+  button_text: string;
+  button_url: string;
+  updated_at?: string;
+}
+
 export interface AppSettings {
   supabaseUrl: string;
   supabaseKey: string;
@@ -37,12 +50,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   supabaseUrl: "",
   supabaseKey: "",
   defaultCreator: "Admin",
-  defaultCreatorUrl: "https://www.instagram.com/rimuru_shop.ai",
+  defaultCreatorUrl: "http://t.me/synthetic_good",
   socials: {
-    instagram: "https://www.instagram.com/rimuru_shop.ai",
+    instagram: "http://t.me/synthetic_good",
     facebook: "https://www.facebook.com/rimurushop27",
     tiktok: "https://www.tiktok.com/@rimuru_shop27",
     whatsapp: "https://whatsapp.com/channel/0029VbBWdG3EFeXoCJJozq2M",
-    telegram: "https://t.me/SyntheticGood"
+    telegram: "http://t.me/synthetic_good"
   }
 };

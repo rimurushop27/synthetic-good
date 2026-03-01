@@ -17,41 +17,6 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-black border-t border-gray-900 pt-8 pb-8 px-4 mt-auto">
       
-      {/* NEW ENGLISH CTA BANNER */}
-      <div className="container mx-auto max-w-4xl mb-10">
-        <div className="w-full relative group overflow-hidden rounded-2xl border border-neonPurple/30 bg-gradient-to-r from-[#2e1065] to-[#1a0b35]">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 blur-[50px] rounded-full"></div>
-            
-            <div className="relative z-10 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                        <span className="bg-red-500/20 text-red-300 text-[10px] font-bold px-2 py-0.5 rounded border border-red-500/30 uppercase tracking-wide animate-pulse">
-                            LIMITED OFFER 🔥
-                        </span>
-                        <span className="text-purple-300 text-xs font-bold flex items-center gap-1">
-                            <Sparkles size={12}/> Premium Pack
-                        </span>
-                    </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-white mb-1">
-                        Gemini Pro 1 Year
-                    </h3>
-                    <p className="text-gray-300 text-sm">
-                        Private premium access — only $10.
-                    </p>
-                </div>
-
-                <a 
-                    href="https://t.me/rimuru_shop27" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="bg-white text-black hover:bg-neonPurple hover:text-white transition-colors px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] transform hover:-translate-y-1 duration-200"
-                >
-                    Buy Now <ExternalLink size={16} />
-                </a>
-            </div>
-        </div>
-      </div>
-
       <div className="container mx-auto max-w-4xl flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
         
         <div>
