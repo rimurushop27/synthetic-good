@@ -42,36 +42,36 @@ const SidePanel: React.FC<SidePanelProps> = ({
   return (
     <>
       <div 
-        className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       />
 
       <div 
         ref={panelRef}
-        className={`fixed top-0 right-0 h-full w-72 bg-[var(--surface-dark)] border-l border-[var(--neon-blue-ultra)] shadow-[0_0_50px_rgba(54,227,255,0.1)] z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-72 bg-[var(--surface)] border-l-4 border-[#111] shadow-[-8px_0_0_0_#111] z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="p-5 flex justify-between items-center border-b border-white/10">
-          <h2 className="text-lg font-bold text-white neon-text-glow">Menu</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-[var(--neon-blue)] transition-colors">
-            <X size={24} />
+        <div className="p-5 flex justify-between items-center border-b-4 border-[#111] bg-[#EAEAEA]">
+          <h2 className="text-xl font-black text-[#111] uppercase tracking-wider">Menu</h2>
+          <button onClick={onClose} className="text-[#111] hover:text-[var(--accent-pink)] transition-colors">
+            <X size={28} />
           </button>
         </div>
 
         <div className="flex-grow overflow-y-auto p-5">
           <div>
-            <h3 className="text-xs uppercase text-[var(--neon-blue)] font-bold mb-4 tracking-wider">Categories</h3>
+            <h3 className="text-xs uppercase text-[#111] bg-[var(--accent-cyan)] font-black mb-4 tracking-wider inline-block px-2 py-1 border-2 border-[#111] shadow-[2px_2px_0_0_#111]">Categories</h3>
             <div className="flex flex-col gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
-                  className={`text-left px-3 py-2 rounded-md font-medium text-sm transition-all ${
+                  className={`text-left px-3 py-2 border-2 border-[var(--border-color)] font-bold text-sm transition-all uppercase ${
                     activeCategory === cat 
-                      ? 'bg-[var(--neon-blue-ultra)] text-[var(--neon-blue)] border border-[var(--neon-blue-soft)]' 
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-[var(--accent-yellow)] text-[#111] shadow-[3px_3px_0_0_#111] translate-x-[-2px] translate-y-[-2px]' 
+                      : 'bg-white text-[#111] hover:bg-[#EAEAEA]'
                   }`}
                 >
                   {cat}
@@ -81,41 +81,41 @@ const SidePanel: React.FC<SidePanelProps> = ({
           </div>
         </div>
 
-        <div className="p-5 border-t border-white/10 space-y-3">
+        <div className="p-5 border-t-4 border-[#111] space-y-3 bg-[#EAEAEA]">
            {!isLoggedIn ? (
              <button 
                 onClick={() => { onLoginClick(); onClose(); }}
-                className="flex items-center gap-3 w-full text-gray-400 hover:text-[var(--neon-blue)] transition-colors p-2 rounded hover:bg-white/5"
+                className="flex items-center gap-3 w-full text-[#111] bg-white border-2 border-[#111] hover:bg-[var(--accent-cyan)] transition-colors p-3 font-bold uppercase shadow-[2px_2px_0_0_#111]"
              >
                 <LogIn size={18} />
-                <span className="text-sm font-medium">Login Admin</span>
+                <span>Login Admin</span>
              </button>
            ) : (
              <>
                <button 
                  onClick={() => { onOpenAdmin(); onClose(); }}
-                 className="flex items-center gap-3 w-full text-gray-400 hover:text-white transition-colors p-2 rounded hover:bg-white/5"
+                 className="flex items-center gap-3 w-full text-[#111] bg-white border-2 border-[#111] hover:bg-[var(--accent-cyan)] transition-colors p-3 font-bold uppercase shadow-[2px_2px_0_0_#111]"
                >
-                 <Shield size={18} className="text-[var(--neon-purple)]" />
-                 <span className="text-sm font-medium">Admin Panel</span>
+                 <Shield size={18} className="text-[var(--accent-pink)]" />
+                 <span>Admin Panel</span>
                </button>
                
                <button 
                  onClick={() => { onOpenSettings(); onClose(); }}
-                 className="flex items-center gap-3 w-full text-gray-400 hover:text-white transition-colors p-2 rounded hover:bg-white/5"
+                 className="flex items-center gap-3 w-full text-[#111] bg-white border-2 border-[#111] hover:bg-[var(--accent-cyan)] transition-colors p-3 font-bold uppercase shadow-[2px_2px_0_0_#111]"
                >
                  <SettingsIcon size={18} />
-                 <span className="text-sm font-medium">Settings</span>
+                 <span>Settings</span>
                </button>
 
-               <div className="h-px bg-white/10 my-2"></div>
+               <div className="h-1 bg-[#111] my-2 w-full"></div>
 
                <button 
                  onClick={() => { onLogoutClick(); onClose(); }}
-                 className="flex items-center gap-3 w-full text-red-400 hover:text-red-300 transition-colors p-2 rounded hover:bg-white/5"
+                 className="flex items-center gap-3 w-full text-white bg-[#111] border-2 border-[#111] hover:bg-[var(--accent-pink)] transition-colors p-3 font-bold uppercase shadow-[2px_2px_0_0_#111]"
                >
                  <LogOut size={18} />
-                 <span className="text-sm font-medium">Logout</span>
+                 <span>Logout</span>
                </button>
              </>
            )}

@@ -51,23 +51,23 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
 
   const renderBannerForm = (banner: SiteBanner, setBanner: React.Dispatch<React.SetStateAction<SiteBanner>>, type: 'top' | 'bottom') => {
     return (
-      <div className="bg-black/30 p-4 rounded-lg border border-white/10 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-white capitalize">{type} Banner</h3>
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-400">Active</label>
+      <div className="brutal-card p-6 mb-6 bg-[var(--surface)]">
+        <div className="flex justify-between items-center mb-6 border-b-2 border-[#111] pb-4">
+          <h3 className="text-xl font-black text-[#111] capitalize uppercase">{type} Banner</h3>
+          <div className="flex items-center gap-2 bg-[#EAEAEA] px-3 py-1 border-2 border-[#111] shadow-[2px_2px_0_0_#111]">
+            <label className="text-xs font-bold uppercase text-[#111] cursor-pointer">Active</label>
             <input 
               type="checkbox" 
               checked={banner.is_active}
               onChange={(e) => setBanner({ ...banner, is_active: e.target.checked })}
-              className="w-4 h-4 accent-[var(--neon-blue)] cursor-pointer"
+              className="w-4 h-4 accent-[#111] cursor-pointer"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Badge Text</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Badge Text</label>
             <input 
               className="settings-input" 
               value={banner.badge_text} 
@@ -76,7 +76,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
             />
           </div>
           <div>
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Pack Label</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Pack Label</label>
             <input 
               className="settings-input" 
               value={banner.pack_label} 
@@ -85,7 +85,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Title</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Title</label>
             <input 
               className="settings-input" 
               value={banner.title} 
@@ -94,7 +94,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Subtitle</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Subtitle</label>
             <input 
               className="settings-input" 
               value={banner.subtitle} 
@@ -103,7 +103,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
             />
           </div>
           <div>
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Button Text</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Button Text</label>
             <input 
               className="settings-input" 
               value={banner.button_text} 
@@ -112,7 +112,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
             />
           </div>
           <div>
-            <label className="text-xs text-[var(--neon-blue)] font-bold uppercase block mb-1">Button URL</label>
+            <label className="text-xs text-[#111] font-bold uppercase block mb-1">Button URL</label>
             <input 
               className="settings-input" 
               value={banner.button_url} 
@@ -124,9 +124,9 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
 
         <button 
           onClick={() => handleSave(banner, type)}
-          className="action-btn w-full flex items-center justify-center gap-2"
+          className="action-btn w-full flex items-center justify-center gap-2 py-3"
         >
-          <Save size={16} /> Save {type} Banner
+          <Save size={18} /> Save {type} Banner
         </button>
       </div>
     );
@@ -138,7 +138,7 @@ const AdminBanners: React.FC<AdminBannersProps> = ({ onUpdate }) => {
 
   return (
     <div>
-      {status && <div className="text-sm text-center text-[var(--neon-blue)] font-bold mb-4">{status}</div>}
+      {status && <div className="text-sm text-center text-[#111] bg-[var(--accent-yellow)] border-2 border-[#111] shadow-[2px_2px_0_0_#111] font-bold mb-4 p-2">{status}</div>}
       {renderBannerForm(topBanner, setTopBanner, 'top')}
       {renderBannerForm(bottomBanner, setBottomBanner, 'bottom')}
     </div>
