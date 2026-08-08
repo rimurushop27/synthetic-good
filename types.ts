@@ -51,13 +51,13 @@ export const DEFAULT_SETTINGS: AppSettings = {
   supabaseUrl: "",
   supabaseKey: "",
   defaultCreator: "Admin",
-  defaultCreatorUrl: "http://t.me/synthetic_good",
+  defaultCreatorUrl: "https://t.me/syntheticgood",
   socials: {
-    instagram: "http://t.me/synthetic_good",
+    instagram: "https://t.me/syntheticgood",
     facebook: "https://www.facebook.com/rimurushop27",
     tiktok: "https://www.tiktok.com/@rimuru_shop27",
-    whatsapp: "https://whatsapp.com/channel/0029VbBWdG3EFeXoCJJozq2M",
-    telegram: "http://t.me/synthetic_good",
+    whatsapp: "https://whatsapp.com/channel/0029VbCEnJNDJ6H5GSEeWt0Y",
+    telegram: "https://t.me/syntheticgood",
     donate: "https://sociabuzz.com/viazamora/tribe"
   }
 };
