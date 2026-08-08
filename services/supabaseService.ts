@@ -15,7 +15,15 @@ export const getSettings = (): AppSettings => {
   };
 
   if (stored) {
-    return { ...baseSettings, ...JSON.parse(stored) };
+    const parsed = JSON.parse(stored);
+    return { 
+      ...baseSettings, 
+      ...parsed,
+      socials: {
+        ...baseSettings.socials,
+        ...(parsed.socials || {})
+      }
+    };
   }
   return baseSettings;
 };

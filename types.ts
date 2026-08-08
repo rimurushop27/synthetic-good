@@ -43,6 +43,7 @@ export interface AppSettings {
     tiktok: string;
     whatsapp: string;
     telegram: string;
+    donate: string;
   }
 }
 
@@ -56,6 +57,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     facebook: "https://www.facebook.com/rimurushop27",
     tiktok: "https://www.tiktok.com/@rimuru_shop27",
     whatsapp: "https://whatsapp.com/channel/0029VbBWdG3EFeXoCJJozq2M",
-    telegram: "http://t.me/synthetic_good"
+    telegram: "http://t.me/synthetic_good",
+    donate: "https://sociabuzz.com/viazamora/tribe"
   }
 };

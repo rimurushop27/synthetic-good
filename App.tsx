@@ -30,7 +30,6 @@ import SiteBanner from './components/SiteBanner';
 import { Zap, Flame, X, Coffee, AlertCircle, Upload, Check, Lock, LogIn, Trash2, LayoutDashboard, PlusSquare, ArrowLeft, Clock, Tag, User, Save, Megaphone } from 'lucide-react';
 import { CATEGORIES } from './constants';
 
-const DONATION_LINK = "https://ko-fi.com/syntheticgood";
 
 // Skeleton Components
 const CardSkeleton = () => (
@@ -544,7 +543,7 @@ const App: React.FC = () => {
 
   // UPDATED: Direct redirect to Donation Link
   const handleDonateClick = () => {
-    window.open(DONATION_LINK, '_blank');
+    window.open(settingsForm.socials?.donate || DEFAULT_SETTINGS.socials.donate, '_blank');
   };
 
   return (
@@ -711,12 +710,24 @@ const App: React.FC = () => {
                       Prompt copied to clipboard. Support us?
                   </p>
                   
-                  <div className="flex gap-3 justify-center relative z-10">
+                  <div className="flex flex-col gap-3 justify-center relative z-10 w-full">
+                      <button 
+                        onClick={() => window.open(settingsForm.socials?.telegram || DEFAULT_SETTINGS.socials.telegram, '_blank')}
+                        className="action-btn px-4 py-3 rounded font-black text-sm text-[#111] bg-[#0088cc] text-white border-2 border-[#111] flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-[3px_3px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all uppercase w-full"
+                      >
+                          Telegram Channel ♥️
+                      </button>
+                      <button 
+                        onClick={() => window.open(settingsForm.socials?.whatsapp || DEFAULT_SETTINGS.socials.whatsapp, '_blank')}
+                        className="action-btn px-4 py-3 rounded font-black text-sm text-[#111] bg-[#25D366] text-white border-2 border-[#111] flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-[3px_3px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all uppercase w-full"
+                      >
+                          WhatsApp Channel 💋
+                      </button>
                       <button 
                         onClick={handleDonateClick}
-                        className="action-btn px-6 py-3 rounded font-black text-sm text-[#111] bg-[var(--accent-yellow)] border-2 border-[#111] flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-[3px_3px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all uppercase w-full"
+                        className="action-btn px-4 py-3 rounded font-black text-sm text-[#111] bg-[var(--accent-yellow)] border-2 border-[#111] flex items-center justify-center gap-2 hover:-translate-y-1 hover:shadow-[3px_3px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all uppercase w-full"
                       >
-                          <Coffee size={16}/> Buy me a coffee ☕
+                          <Coffee size={16}/> Buy me a coffee
                       </button>
                   </div>
               </div>
@@ -1009,14 +1020,26 @@ const App: React.FC = () => {
                   </div>
                   <div className="space-y-4 relative z-10">
                       <div>
-                          <label className="text-xs text-gray-400">Supabase URL</label>
+                          <label className="text-xs text-[#111] font-bold">Supabase URL</label>
                           <input className="settings-input" value={settingsForm.supabaseUrl} onChange={e => setSettingsForm({...settingsForm, supabaseUrl: e.target.value})} placeholder="https://..." />
                       </div>
                       <div>
-                          <label className="text-xs text-gray-400">Supabase Anon Key</label>
+                          <label className="text-xs text-[#111] font-bold">Supabase Anon Key</label>
                           <input className="settings-input" type="password" value={settingsForm.supabaseKey} onChange={e => setSettingsForm({...settingsForm, supabaseKey: e.target.value})} placeholder="eyJh..." />
                       </div>
-                      <button onClick={handleSaveSettings} className="action-btn w-full mt-2">Save & Connect</button>
+                      <div>
+                          <label className="text-xs text-[#111] font-bold">Telegram URL</label>
+                          <input className="settings-input" value={settingsForm.socials?.telegram || ''} onChange={e => setSettingsForm({...settingsForm, socials: {...settingsForm.socials, telegram: e.target.value}})} placeholder="https://t.me/..." />
+                      </div>
+                      <div>
+                          <label className="text-xs text-[#111] font-bold">WhatsApp URL</label>
+                          <input className="settings-input" value={settingsForm.socials?.whatsapp || ''} onChange={e => setSettingsForm({...settingsForm, socials: {...settingsForm.socials, whatsapp: e.target.value}})} placeholder="https://whatsapp.com/..." />
+                      </div>
+                      <div>
+                          <label className="text-xs text-[#111] font-bold">Donate URL (Buy me a coffee)</label>
+                          <input className="settings-input" value={settingsForm.socials?.donate || ''} onChange={e => setSettingsForm({...settingsForm, socials: {...settingsForm.socials, donate: e.target.value}})} placeholder="https://sociabuzz.com/..." />
+                      </div>
+                      <button onClick={handleSaveSettings} className="action-btn w-full mt-4 py-3">Save & Connect</button>
                   </div>
               </div>
           </div>
@@ -1038,6 +1061,25 @@ const App: React.FC = () => {
               />
           </div>
       )}
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+          <button 
+              onClick={() => window.open(settingsForm.socials?.telegram || DEFAULT_SETTINGS.socials.telegram, '_blank')}
+              className="w-14 h-14 bg-[#0088cc] rounded-full flex items-center justify-center border-2 border-[#111] shadow-[4px_4px_0_0_#111] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all"
+              aria-label="Telegram Channel"
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </button>
+          
+          <button 
+              onClick={() => window.open(settingsForm.socials?.whatsapp || DEFAULT_SETTINGS.socials.whatsapp, '_blank')}
+              className="w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center border-2 border-[#111] shadow-[4px_4px_0_0_#111] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#111] active:translate-y-0 active:translate-x-0 active:shadow-none transition-all"
+              aria-label="WhatsApp Channel"
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </button>
+      </div>
 
     </div>
   );
